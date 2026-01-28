@@ -3,6 +3,11 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 export interface Item {
   id: number;
   name: string;
+  category: string;
+  quantity: number;
+  price: number;
+  description: string;
+  createdAt: string;
 }
 
 interface ItemsState {
@@ -19,7 +24,10 @@ const itemsSlice = createSlice({
   name: "items",
   initialState,
   reducers: {
-    addItemRequest(state, _action: PayloadAction<string>) {
+    addItemRequest(
+      state,
+      _action: PayloadAction<Omit<Item, "id" | "createdAt">>
+    ) {
       state.loading = true;
     },
     addItemSuccess(state, action: PayloadAction<Item>) {

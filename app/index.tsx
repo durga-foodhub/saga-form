@@ -1,49 +1,102 @@
-import { View, Text, TextInput, Button, FlatList } from "react-native";
-import { useDispatch, useSelector } from "react-redux";
+import { View, Text, TextInput, TouchableOpacity } from "react-native";
 import { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { router } from "expo-router";
 import { addItemRequest } from "../store/itemSlice";
 import { RootState, AppDispatch } from "../store";
+import { styles } from "../styles/common";
 
 export default function HomeScreen() {
-  const [text, setText] = useState("");
   const dispatch = useDispatch<AppDispatch>();
+  const loading = useSelector((state: RootState) => state.items.loading);
 
-  const { items, loading } = useSelector(
-    (state: RootState) => state.items
-  );
+  const [form, setForm] = useState({
+    name: "",
+    category: "",
+    quantity: "",
+    price: "",
+    description: "",
+  });
 
-  const handleAdd = () => {
-    if (text.trim().length === 0) return;
-    dispatch(addItemRequest(text));
-    setText("");
+  const updateField = (key: string, value: string) => {
+    setForm((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const handleSubmit = () => {
+    dispatch(
+      addItemRequest({
+        name: form.name,
+        category: form.category,
+        quantity: Number(form.quantity),
+        price: Number(form.price),
+        description: form.description,
+      })
+    );
+
+    router.push("/list");
+
+    setForm({
+      name: "",
+      category: "",
+      quantity: "",
+      price: "",
+      description: "",
+    });
   };
 
   return (
-    <View style={{ padding: 20, marginTop: 50 }}>
-      <Text style={{ fontSize: 22, marginBottom: 10 }}>
-        Redux Saga Demo
-      </Text>
+    <View style={styles.screen}>
+      <Text style={styles.title}>Create Item</Text>
 
       <TextInput
-        placeholder="Enter item"
-        value={text}
-        onChangeText={setText}
-        style={{
-          borderWidth: 1,
-          padding: 10,
-          marginBottom: 10,
-        }}
+        placeholder="Name"
+        value={form.name}
+        onChangeText={(v) => updateField("name", v)}
+        style={styles.input}
       />
 
-      <Button title={loading ? "Adding..." : "Add Item"} onPress={handleAdd} />
-
-      <FlatList
-        data={items}
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item }) => (
-          <Text style={{ padding: 10 }}>{item.name}</Text>
-        )}
+      <TextInput
+        placeholder="Category"
+        value={form.category}
+        onChangeText={(v) => updateField("category", v)}
+        style={styles.input}
       />
+
+      <TextInput
+        placeholder="Quantity"
+        keyboardType="numeric"
+        value={form.quantity}
+        onChangeText={(v) => updateField("quantity", v)}
+        style={styles.input}
+      />
+
+      <TextInput
+        placeholder="Price"
+        keyboardType="numeric"
+        value={form.price}
+        onChangeText={(v) => updateField("price", v)}
+        style={styles.input}
+      />
+
+      <TextInput
+        placeholder="Description"
+        value={form.description}
+        onChangeText={(v) => updateField("description", v)}
+        style={styles.input}
+      />
+
+      <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+        <Text style={styles.buttonText}>
+          {loading ? "Submitting..." : "Submit"}
+        </Text>
+      </TouchableOpacity>
+
+    <TouchableOpacity style={styles.buttonSecondary} onPress={() => router.push("./list")}>
+      <Text style={styles.buttonText}>
+        {"View List"}
+      </Text>
+    </TouchableOpacity>
+
     </View>
   );
 }
